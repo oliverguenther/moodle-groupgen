@@ -20,9 +20,11 @@
  *
  * @since 2.0
  * @package course-report
- * @copyright 2009 Sam Hemelryk
+ * @copyright 2012 Olexandr Savchuk, Oliver Guenther
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
+ require_once($CFG->dirroot . '/group/lib.php');
 
 /**
  * This function extends the navigation with the report items
@@ -52,4 +54,23 @@ function groupgen_page_type_list($pagetype, $parentcontext, $currentcontext) {
         'course-report-outline-index' => get_string('pluginpagetype',  'coursereport_outline')
     );
     return $array;
+}
+
+/**
+ * Create a new group in the course. Returns the new group ID.
+ */
+function groupgen_create_group($course, $groupname) {
+	$data = new stdClass();
+	
+	$data->name = $groupname;
+	$data->courseid = $course->id;
+
+	return groups_create_group($data);
+}
+/**
+ * @return boolean True if user added successfully or the user is already a
+ * member of the group, false otherwise.
+ */
+function groupgen_enlist_user($groupid, $userid) {
+	groups_add_user($groupid, $userid);
 }
