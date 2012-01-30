@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Groupgen Access capabilities
+ * Groupgen plugin
  *
  * @package    report
  * @subpackage groupgen
@@ -24,17 +24,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$capabilities = array(
-    'report/groupgen:view' => array(
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    ),
-);
+defined('MOODLE_INTERNAL') || die;
+
+function xmldb_report_groupgen_install() {
+    global $DB;
+
+	// based on report_participation by 2011 Petr Skoda
+    // this is a hack which is needed for cleanup of original coursereport_participation stuff
+    unset_all_config_for_plugin('coursereport_groupgen');
+    capabilities_cleanup('coursereport_groupgen');
+}
 
 

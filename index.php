@@ -1,34 +1,60 @@
 <?php
+// Moodle Groupgen coursereport - Generate groups based on time slices
+// Copyright (C) 2012 Olexandr Savchuk, Oliver Günther
 
-    require_once('../../../config.php');
-    require_once($CFG->dirroot.'/course/lib.php');
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 
-    $id = required_param('id',PARAM_INT);       // course id
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
 
-    if (!$course = $DB->get_record('course', array('id'=>$id))) {
-        print_error('invalidcourseid');
-    }
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    $PAGE->set_url('/course/report/groupgen/index.php', array('id'=>$id));
-    
-    require_login($course);
-    $context = get_context_instance(CONTEXT_COURSE, $course->id);
-    require_capability('coursereport/groupgen:view', $context);
+/**
+ * Groupgen plugin
+ *
+ * @package    report
+ * @subpackage groupgen
+ * @copyright  2012 onwards Olexandr Savchuk, Oliver Günther
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-    $showlastaccess = true;
-    $hiddenfields = explode(',', $CFG->hiddenuserfields);
+require('../../config.php');
+require_once('report_groupgen_form.php');
 
-    $stractivityreport = get_string('activityreport');
-    $stractivity       = get_string('activity');
-    $strlast           = get_string('lastaccess');
-    $strreports        = get_string('reports');
-    $strviews          = get_string('views');
-    $strrelatedblogentries = get_string('relatedblogentries', 'blog');
+$id         = required_param('id', PARAM_INT); // course id.
+$action     = optional_param('action', '', PARAM_ALPHA);
 
-    $PAGE->set_title($course->shortname .': '. get_string('menu_text', 'coursereport_groupgen'));
-    echo $OUTPUT->header();
-    echo $OUTPUT->heading(format_string(get_string('menu_text', 'coursereport_groupgen')));
-    
-	
+$url = new moodle_url('/report/groupgen/index.php', array('id'=>$id));
+if ($action !== '') $url->param('action');
+$PAGE->set_url($url);
+$PAGE->set_pagelayout('admin');
 
-    echo $OUTPUT->footer();
+if (!$course = $DB->get_record('course', array('id'=>$id))) {
+    print_error('invalidcourse');
+}
+
+require_login($course);
+$context = get_context_instance(CONTEXT_COURSE, $course->id);
+require_capability('report/groupgen:view', $context);
+
+add_to_log($course->id, "course", "groupgen view", "report/groupgen/index.php?id=$course->id", $course->id);
+
+$PAGE->set_title($course->shortname .': Groupgen');
+$PAGE->set_heading($course->fullname);
+echo $OUTPUT->header();
+
+$mform = new report_groupgen_form();
+if ($fromform=$mform->get_data()){
+	// TODO 
+	print_r($fromform);
+} else {
+    $mform->display();
+}
+
+echo $OUTPUT->footer();
