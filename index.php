@@ -54,6 +54,18 @@ if ($fromform=$mform->get_data()){
 	// TODO 
 	print_r($fromform);
 } else {
+
+	$enrolled = get_enrolled_users($context, '', 0, 'u.id, u.firstname, u.lastname');
+	$list = array();
+	foreach ($enrolled as $user) {
+		$list[$user->id] = "$user->lastname, $user->firstname";
+	}
+	// Set enrolled users
+	$defaults = new stdClass;
+	$defaults->enroll_tutor_select = $list;
+	$defaults->counter_enabled = 1;
+
+	$mform->set_data($defaults);
     $mform->display();
 }
 

@@ -32,9 +32,9 @@ class report_groupgen_form extends moodleform {
         $mform->addHelpButton('timeslices_offset', 'timeslices_offset', 'report_groupgen');
 
 		// Disable all settings unless checked
-        $mform->disabledIf('timeslices_starttime', 'timeslices_enabled', 'eq', '0');
-        $mform->disabledIf('timeslices_endtime', 'timeslices_enabled', 'eq', '0');
-        $mform->disabledIf('timeslices_offset', 'timeslices_enabled', 'eq', '0');
+        $mform->disabledIf('timeslices_starttime', 'timeslices_enabled', 'notchecked');
+        $mform->disabledIf('timeslices_endtime', 'timeslices_enabled', 'notchecked');
+        $mform->disabledIf('timeslices_offset', 'timeslices_enabled', 'notchecked');
 
 //-------------------------------------------------------------------------------
 		// COUNTER
@@ -47,15 +47,22 @@ class report_groupgen_form extends moodleform {
         $mform->addHelpButton('counter_offset', 'counter_offset', 'report_groupgen');
 
 		// Disable all settings unless checked
-        $mform->disabledIf('counter_offset', 'counter_enabled', 'eq', '0');
+        $mform->disabledIf('counter_offset', 'counter_enabled', 'notchecked');
 
 
 //-------------------------------------------------------------------------------
 		// Let people combine their settings to the string they desire
         $mform->addElement('header', 'template_header', get_string('template_header', 'report_groupgen'));
+		$mform->addElement('html', '<p>' . get_string('groupname_template_p', 'report_groupgen') . '</p>');
 		$mform->addElement('text', 'groupname_template', get_string('groupname_template', 'report_groupgen'));
 		
+//-------------------------------------------------------------------------------
+		// Allow one enlisted user to be enrolled in all groups (e.g., a tutor/mentor)
+        $mform->addElement('header', 'enroll_tutor_header', get_string('enroll_tutor', 'report_groupgen'));
+        $mform->addElement('select', 'enroll_tutor_select', get_string('enroll_tutor_select', 'report_groupgen'));
+        $mform->addHelpButton('enroll_tutor_select', 'enroll_tutor', 'report_groupgen');
 
+		
 
 //-------------------------------------------------------------------------------
         $this->add_action_buttons();

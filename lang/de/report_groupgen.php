@@ -51,3 +51,9 @@ $string['groupname_template'] = 'Vorlage für Gruppennamen';
 $string['groupname_template_p'] = 'Setze eine Vorlage mithilfe dieser Variablen: #{counter}, #{timeslice}, ...';
 $string['groupname_template_help'] = 'Wähle die Vorlage der Gruppennamen mit den oben angegebenen Variablen.';
 
+// tutor enroll
+$string['enroll_tutor'] = 'Tutor in Gruppe einwählen';
+$string['enroll_tutor_select'] = 'Wähle einen Nutzer';
+$string['enroll_tutor_help'] = 'Füge den ausgewählten Nutzer automatisch der Gruppe hinzu (z.B. den Tutor der Gruppe) ';
+
+
