@@ -44,7 +44,7 @@ function report_groupgen_extend_navigation_course($navigation, $course, $context
  *
  * @param string $groupname
  * @param stdClass $course
- * @return TRUE if group has been created, FALSE otherwise
+ * @return group id or false if creation failed
  */
 function report_groupgen_generategroup($groupname, $course) {
 	$data = new stdClass();
@@ -126,4 +126,36 @@ function report_groupgen_generate_groups_timeslice($template, $start, $end, $dur
 	} while ($time < $time_end);
 
 	return $groups;
+}
+
+/*
+ * Check whether there are groups with same names already existing in the course.
+ * @param string[] $groups Group names to check
+ * @returns stdClass[] array of objects with parameters: 'groupname' and 'exists'
+ */
+function report_groupgen_check_duplicates($groups, $course) {
+	$result = array();
+	foreach($groups as $groupname) {
+		$group = new stdClass();
+		$group->groupname = $groupname;
+		$group->exists = $DB->record_exists('groups', array('name'=>$groupname, 'courseid' => $course->id));
+		$result[] = $group;
+	}
+	return $result;
+}
+
+/**
+ * Generate all groups in the given course.
+ * @param string[] $groups Group names as a string array
+ * @param stdClass $course Course object
+ * @param int $userid optional User id to enroll in all generated groups
+ */
+function report_groupgen_generate_groups($groups, $course, $userid = -1) {
+	$groupids[] = array();
+	foreach($groups as $groupname) {
+		$id = report_groupgen_generategroup($groupname, $course);
+		if ($id) $groupids[] = $id;
+		if ($id && $userid > -1) groups_add_user($id, $userid)
+	}
+	return $groupids;
 }
