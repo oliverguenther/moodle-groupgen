@@ -68,7 +68,7 @@ function report_groupgen_page_type_list($pagetype, $parentcontext, $currentconte
  * member of the group, false otherwise.
  */
 function report_groupgen_enlist_user($groupid, $userid) {
-	return groups_add_user($groupid, $userid);
+	return groups_add_member($groupid, $userid);
 }
 
 /** Transforms a hh:mm time string into seconds (3600 * hh + 60 * mm) 

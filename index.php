@@ -49,23 +49,34 @@ $PAGE->set_title($course->shortname .': Groupgen');
 $PAGE->set_heading($course->fullname);
 
 $mform = new report_groupgen_form();
-$confirmerrors = '';
+$confirmerrors = array();
 if ($confirmed === 1) {
 	
 	// Retrieve groups
 	$groups = optional_param_array('group', '', PARAM_RAW);
 
+	// Optional user id to enroll into all groups
+	$enrolltutorid = optional_param('enrolltutor', '', PARAM_INT);
+
 	if (!empty($groups)) {
 		$success = true;
 		foreach ($groups as $groupname) {
-			if (!report_groupgen_generategroup($groupname, $course)) {
-				$confirmerrors .= "Couldn't create group $groupname <br/>";
+
+			// Create group
+			$gid = report_groupgen_generategroup($groupname, $course);
+			if ($gid === false) {
+				$confirmerrors[] = get_string('creategroup_failed', 'report_groupgen', $groupname);
 				$success = false;
+			} else {
+				// Enroll tutor in group
+				if (!empty($enrolltutorid) && !report_groupgen_enlist_user($gid, $enrolltutorid)) {
+					$confirmerrors[] = get_string('enrolltutor_failed', 'report_groupgen', $enrolltutorid, $groupname);
+				}
 			}
 		}
 		if ($success) {
 			// Forward to groups
-			$courseurl = new moodle_url("/group/view.php?id=$course->id");
+			$courseurl = new moodle_url("/group/index.php?id=$course->id");
 			redirect($courseurl);
 		}
 
@@ -77,7 +88,7 @@ echo $OUTPUT->header();
 
 if (!empty($confirmerrors)) {
 	echo '<h1>' . get_string('error') . '</h1>';
-	echo '<p class="error">' . $confirmerrors . '</p>';
+	echo '<p class="error">' . implode("<br/>", $confirmerrors) . '</p>';
 }
 
 if ($data = $mform->get_data()) {
@@ -88,6 +99,7 @@ if ($data = $mform->get_data()) {
 	$duration = $data->timeslices_duration;
 	$offset = isset($data->timeslices_offset) ? $data->timeslices_offset : 0;
 	$counter = isset($data->counter_offset) ? $data->counter_offset : -1;
+	$enrolltutor = isset($data->enroll_tutor_enabled) ? $data->enroll_tutor_select : null;
 
 	// Preview group generation to allow corrections
 	$groups = report_groupgen_generate_groups_timeslice_posix(
@@ -109,6 +121,9 @@ if ($data = $mform->get_data()) {
 	$gt = html_writer::start_tag('form', $attributes);
 	$gt .= html_writer::start_tag('table'); // </TABLE>
     $gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'confirmed', 'value' => 1));       
+
+	if (isset($enrolltutor))
+		$gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'enrolltutor', 'value' => $enrolltutor));
 	
 	
 	$gt .= html_writer::start_tag('tr');

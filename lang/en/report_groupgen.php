@@ -68,3 +68,6 @@ $string['error_template_marker'] = 'To use the marker {$a}, you must enable this
 $string['groupname'] = 'Final groupname';
 $string['groupgen_group_exists'] = '(Group exists)';
 $string['confirm_disabled'] = 'All groups exist already. Cannot proceed';
+$string['creategroup_failed'] = 'Couldn\'t create group named {$a}';
+$string['enrolltutor_failed'] = 'Couldn\'t enroll user with id {$a} into group {$b}';
+
