@@ -26,6 +26,7 @@
 
 require('../../config.php');
 require_once('report_groupgen_form.php');
+require_once('lib.php');
 
 $id         = required_param('id', PARAM_INT); // course id.
 $confirmed     = optional_param('confirmed', '', PARAM_INT);
@@ -46,15 +47,40 @@ add_to_log($course->id, "course", "groupgen view", "report/groupgen/index.php?id
 
 $PAGE->set_title($course->shortname .': Groupgen');
 $PAGE->set_heading($course->fullname);
-echo $OUTPUT->header();
 
 $mform = new report_groupgen_form();
+$confirmerrors = '';
 if ($confirmed === 1) {
 	
-	// TODO write groups
+	// Retrieve groups
+	$groups = optional_param_array('group', '', PARAM_RAW);
 
+	if (!empty($groups)) {
+		$success = true;
+		foreach ($groups as $groupname) {
+			if (!report_groupgen_generategroup($groupname, $course)) {
+				$confirmerrors .= "Couldn't create group $groupname <br/>";
+				$success = false;
+			}
+		}
+		if ($success) {
+			// Forward to groups
+			$courseurl = new moodle_url("/group/view.php?id=$course->id");
+			redirect($courseurl);
+		}
 
-} else if ($data = $mform->get_data()) {
+	}
+
+} 
+
+echo $OUTPUT->header();
+
+if (!empty($confirmerrors)) {
+	echo '<h1>' . get_string('error') . '</h1>';
+	echo '<p class="error">' . $confirmerrors . '</p>';
+}
+
+if ($data = $mform->get_data()) {
 
 	$template = $data->groupname_template;
 	$starttime = $data->timeslices_starttime;
@@ -72,7 +98,11 @@ if ($confirmed === 1) {
 		$offset,
 		$counter
 	);
+
+	// Append for duplicates
+	$groups = report_groupgen_check_duplicates($groups, $course);
 	
+
    	$attributes = array('id' => 'report_groupgen_confirm', 'method' => 'POST', 'action' => $url);
 
 	// Print table for confirmation
@@ -85,14 +115,28 @@ if ($confirmed === 1) {
 	$gt .= html_writer::tag('th', get_string('groupname', 'report_groupgen'));
 	$gt .= html_writer::end_tag('tr');
 
-	foreach ($groups as $groupname) {
+	$available = 0;
+	foreach ($groups as $i => $group) {
 		$gt .= html_writer::start_tag('tr');
-		$gt .= html_writer::tag('td', $groupname);
+
+		
+
+		if (empty($group->exists)) {
+			$gt .= html_writer::tag('td', $group->groupname, array('class' => 'groupgen_okay'));
+		    $gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => "group[$i]", 'value' => $group->groupname));       
+			$available++;
+		} else {
+			$gt .= html_writer::tag('td', $group->groupname . " " . get_string('groupgen_group_exists', 'report_groupgen'), array('class' => 'groupgen_error'));
+		}
 		$gt .= html_writer::end_tag('tr');
 	}
 
 	$gt .= html_writer::end_tag('table'); // </TABLE>
-    $gt .= html_writer::empty_tag('input', array('type'=>'submit', 'value'=>get_string('confirm'), 'class'=>'button'));
+	if ($available == 0) {
+		$gt .= html_writer::tag('p', get_string('confirm_disabled', 'report_groupgen'), array('class' => 'groupgen_error')) ;
+	} else {
+    	$gt .= html_writer::empty_tag('input', array('type'=>'submit', 'value'=>get_string('confirm')));
+	}
 	$gt .= html_writer::end_tag('form');
 
 	echo $gt;

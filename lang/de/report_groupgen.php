@@ -65,3 +65,6 @@ $string['error_template_marker'] = 'Um die Variable {$a} nutzen zu können, müs
 
 // Confirmation
 $string['groupname'] = 'Zu erstellender Gruppenname';
+$string['groupgen_group_exists'] = '(Gruppe existiert bereits)';
+$string['confirm_disabled'] = 'Alle Gruppen existieren bereits. Kann nicht fortfahren';
+

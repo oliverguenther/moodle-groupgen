@@ -66,3 +66,5 @@ $string['error_template_marker'] = 'To use the marker {$a}, you must enable this
 
 // Confirmation
 $string['groupname'] = 'Final groupname';
+$string['groupgen_group_exists'] = '(Group exists)';
+$string['confirm_disabled'] = 'All groups exist already. Cannot proceed';

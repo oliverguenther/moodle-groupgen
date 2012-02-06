@@ -188,6 +188,7 @@ function report_groupgen_generate_groups_timeslice_string($template, $start, $en
  * @returns stdClass[] array of objects with parameters: 'groupname' and 'exists'
  */
 function report_groupgen_check_duplicates($groups, $course) {
+	global $DB;
 	$result = array();
 	foreach($groups as $groupname) {
 		$group = new stdClass();

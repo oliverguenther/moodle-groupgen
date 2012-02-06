@@ -39,3 +39,15 @@ form#report_groupgen_confirm {
 	padding: 20px; 
 	border: 1px solid #000;
 }
+
+td {
+	font-weight: bold;
+}
+
+.groupgen_okay {
+	color: darkGreen;	
+}
+
+.groupgen_error {
+	color: darkRed;	
+}
