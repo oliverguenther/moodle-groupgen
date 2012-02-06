@@ -71,30 +71,34 @@ function report_groupgen_enlist_user($groupid, $userid) {
 	return groups_add_user($groupid, $userid);
 }
 
-/** Transforms a hh:mm time string into an int with value 60*hh+mm */
+/** Transforms a hh:mm time string into seconds (3600 * hh + 60 * mm) 
+ */
 function report_groupgen_string_to_time($string) {
 	if (preg_match("/^[0-9]{2}\:[0-9]{2}$/", $string) == 0)
 		return 0;
 	$chunks = explode(':', $string);
-	return $chunks[0] * 60 + $chunks[1];
+	return 3600 * $chunks[0] + 60 * $chunks[1];
 }
 
-/** Transforms a int with value 60*hh+mm into hh:mm time string */
+/** Transforms seconds into hh::mm time string */
 function report_groupgen_time_to_string($time) {
-	return sprintf("%02d:%02d", floor($time/60), $time % 60);
+	$hours = floor($time / 3600);
+	return sprintf("%02d:%02d", $hours, ($time % 3600) / 60);
 }
+
 
 /**
  * Generate group names to fill the time span with given group lengths and pauses.
+ * Use seconds for intervals
  * @param string $template Group name template, using #{start} and #{end} as placeholders
- * @param string $start Start of the time span, hh:mm
- * @param string $end End of the time span, hh:mm
- * @param string $duration Duration of a single group, hh:mm
- * @param string $pause Duration of a pause between groups, hh:mm
+ * @param string $start Start of the time span (seconds)
+ * @param string $end End of the time span, (seconds)
+ * @param string $duration Duration of a single group (seconds)
+ * @param string $pause Duration of a pause between groups (seconds)
  * @param int $counter optional Number to assign to the first generated group
  * @return string[] Generated group names
  */
-function report_groupgen_generate_groups_timeslice($template, $start, $end, $duration, $pause = "00:00", $counter = -1) {
+function report_groupgen_generate_groups_timeslice($template, $start, $end, $duration, $pause = 0, $counter = -1) {
 
 	// init output array
 	$groups = array();
@@ -104,16 +108,10 @@ function report_groupgen_generate_groups_timeslice($template, $start, $end, $dur
 	if ($counter > -1) 
 		$needle[] = '#{counter}';
 
-	// transform input times into ints for easy calculation
-	$time = report_groupgen_string_to_time($start);
-	$time_end = report_groupgen_string_to_time($end);
-	$time_duration = report_groupgen_string_to_time($duration);
-	$time_pause = report_groupgen_string_to_time($pause);
-	
 	do {
 		// group start and end times
-		$group_start = $time;
-		$group_end = $time += $time_duration;
+		$group_start = $start;
+		$group_end = $start += $duration;
 
 		// format group name and add to results
 		$replace = array(report_groupgen_time_to_string($group_start), report_groupgen_time_to_string($group_end));
@@ -122,10 +120,66 @@ function report_groupgen_generate_groups_timeslice($template, $start, $end, $dur
 		$groups[] = str_replace($needle, $replace, $template);
 
 		// add pause time between groups
-		$time += $time_pause;
-	} while ($time < $time_end);
+		$start += $pause;
+	} while ($start < $end);
 
 	return $groups;
+}
+
+
+/**
+ * Generate group names to fill the time span with given group lengths and pauses.
+ * Uses POSIX time for intervals
+ * @param string $template Group name template, using #{start} and #{end} as placeholders
+ * @param string $start Start of the time span (posix time)
+ * @param string $end End of the time span, (posix time)
+ * @param string $duration Duration of a single group, in seconds
+ * @param string $pause Duration of a pause between groups, in seconds
+ * @param int $counter optional Number to assign to the first generated group
+ * @return string[] Generated group names
+ */
+function report_groupgen_generate_groups_timeslice_posix($template, $start, $end, $duration, $pause = 0, $counter = -1) {
+
+	// transform start/end time posix time
+	
+	// Get start/end dates
+	$start_date = date('Ymd', $start);
+	$end_date = date('Ymd', $start);
+
+	if ($start_date == $end_date) {
+		$start_time = 3600 * date('H', $start) + 60 * date('i', $start);
+		$end_time = 3600 * date('H', $end) + 60 * date('i', $end);
+
+		return report_groupgen_generate_groups_timeslice($template, $start_time, $end_time, $duration, $pause, $counter);
+
+	} else {
+		// TODO multiple days group generation
+		return null;
+	}
+
+}
+
+/**
+ * Generate group names to fill the time span with given group lengths and pauses.
+ * Uses HH::MM string formats for intervals
+ * @param string $template Group name template, using #{start} and #{end} as placeholders
+ * @param string $start Start of the time span, hh:mm
+ * @param string $end End of the time span, hh:mm
+ * @param string $duration Duration of a single group, hh:mm
+ * @param string $pause Duration of a pause between groups, hh:mm
+ * @param int $counter optional Number to assign to the first generated group
+ * @return string[] Generated group names
+ */
+function report_groupgen_generate_groups_timeslice_string($template, $start, $end, $duration, $pause = "0:00", $counter = -1) {
+
+	// transform input strings into seconds
+	$time = report_groupgen_string_to_time($start);
+	$time_end = report_groupgen_string_to_time($end);
+	$time_duration = report_groupgen_string_to_time($duration);
+	$time_pause = report_groupgen_string_to_time($pause);
+
+	report_groupgen_generate_groups_timeslice($template, $time, $time_end, $time_duration, $time_pause);
+
 }
 
 /*

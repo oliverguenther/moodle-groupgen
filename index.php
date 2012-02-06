@@ -28,10 +28,9 @@ require('../../config.php');
 require_once('report_groupgen_form.php');
 
 $id         = required_param('id', PARAM_INT); // course id.
-$action     = optional_param('action', '', PARAM_ALPHA);
+$confirmed     = optional_param('confirmed', '', PARAM_INT);
 
 $url = new moodle_url('/report/groupgen/index.php', array('id'=>$id));
-if ($action !== '') $url->param('action');
 $PAGE->set_url($url);
 $PAGE->set_pagelayout('admin');
 
@@ -50,24 +49,56 @@ $PAGE->set_heading($course->fullname);
 echo $OUTPUT->header();
 
 $mform = new report_groupgen_form();
-if ($fromform=$mform->get_data()){
-	// TODO 
-	print_r($fromform);
-} else {
+if ($confirmed === 1) {
+	
+	// TODO write groups
 
-	$enrolled = get_enrolled_users($context, '', 0, 'u.id, u.firstname, u.lastname');
-	$list = array();
-	foreach ($enrolled as $user) {
-		$list[$user->id] = "$user->lastname, $user->firstname";
+
+} else if ($data = $mform->get_data()) {
+
+	$template = $data->groupname_template;
+	$starttime = $data->timeslices_starttime;
+	$endtime = $data->timeslices_endtime;
+	$duration = $data->timeslices_duration;
+	$offset = isset($data->timeslices_offset) ? $data->timeslices_offset : 0;
+	$counter = isset($data->counter_offset) ? $data->counter_offset : -1;
+
+	// Preview group generation to allow corrections
+	$groups = report_groupgen_generate_groups_timeslice_posix(
+		$template,
+		$starttime,
+		$endtime,
+		$duration,
+		$offset,
+		$counter
+	);
+	
+   	$attributes = array('id' => 'report_groupgen_confirm', 'method' => 'POST', 'action' => $url);
+
+	// Print table for confirmation
+	$gt = html_writer::start_tag('form', $attributes);
+	$gt .= html_writer::start_tag('table'); // </TABLE>
+    $gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'confirmed', 'value' => 1));       
+	
+	
+	$gt .= html_writer::start_tag('tr');
+	$gt .= html_writer::tag('th', get_string('groupname', 'report_groupgen'));
+	$gt .= html_writer::end_tag('tr');
+
+	foreach ($groups as $groupname) {
+		$gt .= html_writer::start_tag('tr');
+		$gt .= html_writer::tag('td', $groupname);
+		$gt .= html_writer::end_tag('tr');
 	}
-	// Set enrolled users
-	$defaults = new stdClass;
-	$defaults->enroll_tutor_select = $list;
-	$defaults->counter_enabled = 1;
 
-	$mform->set_data($defaults);
-    $mform->display();
-	$foo = $mform->get_data();
+	$gt .= html_writer::end_tag('table'); // </TABLE>
+    $gt .= html_writer::empty_tag('input', array('type'=>'submit', 'value'=>get_string('confirm'), 'class'=>'button'));
+	$gt .= html_writer::end_tag('form');
+
+	echo $gt;
+
+	
 }
 
+$mform->display();
 echo $OUTPUT->footer();

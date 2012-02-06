@@ -49,12 +49,18 @@ $string['counter_offset_help'] = '(Optional) Gebe hier einen Startwert an, ab de
 // templates
 $string['template_header'] = 'Vorlage';
 $string['groupname_template'] = 'Vorlage für Gruppennamen';
-$string['groupname_template_p'] = 'Setze eine Vorlage mithilfe dieser Variablen: #{counter}, #{timeslice}, ...';
+$string['groupname_template_p'] = 'Setze eine Vorlage mithilfe dieser Variablen: #{counter}, #{start}, #{end}';
 $string['groupname_template_help'] = 'Wähle die Vorlage der Gruppennamen mit den oben angegebenen Variablen.';
 
 // tutor enroll
-$string['enroll_tutor'] = 'Tutor in Gruppe einwählen';
+$string['enroll_tutor_enabled'] = 'Tutor in Gruppe einwählen';
+$string['enroll_tutor'] = 'Tutor auswählen';
 $string['enroll_tutor_select'] = 'Wähle einen Nutzer';
 $string['enroll_tutor_help'] = 'Füge den ausgewählten Nutzer automatisch der Gruppe hinzu (z.B. den Tutor der Gruppe) ';
 
+// Form validation / errors
+$string['error_counter_numeric'] = "Der Zähler-Startwert muss numerisch sein!";
+$string['error_template_marker'] = 'Um die Variable {$a} nutzen zu können, musst du diese Option aktivieren!';
 
+// Confirmation
+$string['groupname'] = 'Zu erstellender Gruppenname';
