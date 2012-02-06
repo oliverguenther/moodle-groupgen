@@ -34,6 +34,8 @@ $string['timeslices_starttime'] = 'Startzeitpunkt';
 $string['timeslices_starttime_help'] = 'Setze dies auf den Startzeitpunkt der Intervalle';
 $string['timeslices_endtime'] = 'Endzeitpunkt';
 $string['timeslices_endtime_help'] = 'Setze dies auf die Zeit, an der das letzte Intervall enden soll';
+$string['timeslices_duration'] = 'Dauer eines Intervalls';
+$string['timeslices_duration_help'] = 'Wähle hier die Dauer <strong>eines</strong> Intervalls';
 $string['timeslices_offset'] = 'Abstand zwischen Intervallen';
 $string['timeslices_offset_help'] = '(Optional) Gebe hier einen Abstand zwischen jedem Intervall an';
 

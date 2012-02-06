@@ -67,6 +67,7 @@ if ($fromform=$mform->get_data()){
 
 	$mform->set_data($defaults);
     $mform->display();
+	$foo = $mform->get_data();
 }
 
 echo $OUTPUT->footer();

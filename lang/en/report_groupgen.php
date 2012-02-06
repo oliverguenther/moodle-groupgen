@@ -36,6 +36,8 @@ $string['timeslices_starttime'] = 'Starting time';
 $string['timeslices_starttime_help'] = 'Set this to the time where the slicing should start.';
 $string['timeslices_endtime'] = 'Ending time';
 $string['timeslices_endtime_help'] = 'Set this to a time where the last slice should stop.';
+$string['timeslices_duration'] = 'Duration of slice';
+$string['timeslices_duration_help'] = 'Set the duraton of each slice';
 $string['timeslices_offset'] = 'Offset between slices';
 $string['timeslices_offset_help'] = '(Optional) Specify an offset in minutes between each slice';
 

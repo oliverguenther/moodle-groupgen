@@ -9,7 +9,7 @@ require_once ($CFG->dirroot . '/course/moodleform_mod.php');
 class report_groupgen_form extends moodleform {
 
     function definition() {
-        global $CFG;
+        global $CFG, $course;
 
         $mform = & $this->_form;
 
@@ -27,6 +27,10 @@ class report_groupgen_form extends moodleform {
 		$mform->addElement('date_time_selector', 'timeslices_endtime', get_string('timeslices_endtime', 'report_groupgen'));
         $mform->addHelpButton('timeslices_endtime', 'timeslices_endtime', 'report_groupgen');
 
+		// Slices duration
+		$mform->addElement('duration', 'timeslices_duration', get_string('timeslices_duration', 'report_groupgen'));
+        $mform->addHelpButton('timeslices_duration', 'timeslices_duration', 'report_groupgen');
+
 		// offset between slices, in minutes
 		$mform->addElement('text', 'timeslices_offset', get_string('timeslices_offset', 'report_groupgen'));
         $mform->addHelpButton('timeslices_offset', 'timeslices_offset', 'report_groupgen');
@@ -34,6 +38,7 @@ class report_groupgen_form extends moodleform {
 		// Disable all settings unless checked
         $mform->disabledIf('timeslices_starttime', 'timeslices_enabled', 'notchecked');
         $mform->disabledIf('timeslices_endtime', 'timeslices_enabled', 'notchecked');
+        $mform->disabledIf('timeslices_duration', 'timeslices_enabled', 'notchecked');
         $mform->disabledIf('timeslices_offset', 'timeslices_enabled', 'notchecked');
 
 //-------------------------------------------------------------------------------
@@ -54,13 +59,25 @@ class report_groupgen_form extends moodleform {
 		// Let people combine their settings to the string they desire
         $mform->addElement('header', 'template_header', get_string('template_header', 'report_groupgen'));
 		$mform->addElement('html', '<p>' . get_string('groupname_template_p', 'report_groupgen') . '</p>');
-		$mform->addElement('text', 'groupname_template', get_string('groupname_template', 'report_groupgen'));
+		$mform->addElement('text', 'groupname_template', get_string('groupname_template', 'report_groupgen'), 'size="100"');
+		$mform->setDefault('groupname_template', 'Gruppen-Intervall Nr. #{counter} - #{timeslice}');
 		
 //-------------------------------------------------------------------------------
 		// Allow one enlisted user to be enrolled in all groups (e.g., a tutor/mentor)
+
+		// Fetch enrolled users
+		$context = get_context_instance(CONTEXT_COURSE, $course->id);
+		$enrolled = get_enrolled_users($context, '', 0, 'u.id, u.firstname, u.lastname');
+		$list = array();
+		foreach ($enrolled as $user) {
+			$list[$user->id] = "$user->lastname, $user->firstname";
+		}
+		$mform->setDefault('enroll_tutor_select', $list);
         $mform->addElement('header', 'enroll_tutor_header', get_string('enroll_tutor', 'report_groupgen'));
-        $mform->addElement('select', 'enroll_tutor_select', get_string('enroll_tutor_select', 'report_groupgen'));
+        $mform->addElement('select', 'enroll_tutor_select', get_string('enroll_tutor_select', 'report_groupgen'), $list);
         $mform->addHelpButton('enroll_tutor_select', 'enroll_tutor', 'report_groupgen');
+
+
 
 		
 

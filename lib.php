@@ -155,7 +155,7 @@ function report_groupgen_generate_groups($groups, $course, $userid = -1) {
 	foreach($groups as $groupname) {
 		$id = report_groupgen_generategroup($groupname, $course);
 		if ($id) $groupids[] = $id;
-		if ($id && $userid > -1) groups_add_user($id, $userid)
+		if ($id && $userid > -1) groups_add_user($id, $userid);
 	}
 	return $groupids;
 }
