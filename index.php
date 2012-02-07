@@ -54,12 +54,27 @@ if ($confirmed === 1) {
 	
 	// Retrieve groups
 	$groups = optional_param_array('group', '', PARAM_RAW);
+	
+	// Optinal grouping ID and new name
+	$grouping = optional_param('grouping', '', PARAM_INT);
+	$grouping_new_name = optional_param('grouping_new', '', PARAM_TEXT);
 
 	// Optional user id to enroll into all groups
 	$enrolltutorid = optional_param('enrolltutor', '', PARAM_INT);
 
 	if (!empty($groups)) {
 		$success = true;
+		
+		// Create new grouping
+		if (!empty($grouping_new_name)) {
+			$grouping = report_groupgen_generategrouping($grouping_new_name, $course);
+			if (!$grouping) {
+				$confirmerrors[] = get_string('creategrouping_failed', 'report_groupgen', $grouping_new_name);
+				$success = false;
+			}
+		}
+		
+		// Create groups
 		foreach ($groups as $groupname) {
 
 			// Create group
@@ -71,6 +86,11 @@ if ($confirmed === 1) {
 				// Enroll tutor in group
 				if (!empty($enrolltutorid) && !report_groupgen_enlist_user($gid, $enrolltutorid)) {
 					$confirmerrors[] = get_string('enrolltutor_failed', 'report_groupgen', $enrolltutorid, $groupname);
+				}
+				
+				// Add group to grouping
+				if (!empty($grouping) && $grouping > 0 && !groups_assign_grouping($grouping, $gid)) {
+					$confirmerrors[] = get_string('assigngrouping_failed', 'report_groupgen', $groupname);
 				}
 			}
 		}
@@ -100,6 +120,21 @@ if ($data = $mform->get_data()) {
 	$offset = isset($data->timeslices_offset) ? $data->timeslices_offset : 0;
 	$counter = isset($data->counter_offset) ? $data->counter_offset : -1;
 	$enrolltutor = isset($data->enroll_tutor_enabled) ? $data->enroll_tutor_select : null;
+	$grouping = isset($data->grouping_enabled) ? $data->grouping_select : null;
+	
+	// Get grouping name from ID or new name
+	if ($grouping > 0) {
+		$grouping_record = $DB->get_record('groupings', array('id'=>$grouping), '*', MUST_EXIST);
+		$grouping_name = $grouping_record->name;
+		$grouping_new = false;
+	} else if ($grouping == 0 && $data->grouping_new_name) {
+		$grouping_name = $data->grouping_new_name;
+		$grouping_new = true;
+	}
+	
+	// Get tutor name if provided
+	if(isset($enrolltutor))
+		$tutor = $DB->get_record('user', array('id'=>$enrolltutor), '*', MUST_EXIST);
 
 	// Preview group generation to allow corrections
 	$groups = report_groupgen_generate_groups_timeslice_posix(
@@ -114,18 +149,12 @@ if ($data = $mform->get_data()) {
 	// Append for duplicates
 	$groups = report_groupgen_check_duplicates($groups, $course);
 	
-
-   	$attributes = array('id' => 'report_groupgen_confirm', 'method' => 'POST', 'action' => $url);
-
 	// Print table for confirmation
+	$attributes = array('id' => 'report_groupgen_confirm', 'method' => 'POST', 'action' => $url);
 	$gt = html_writer::start_tag('form', $attributes);
 	$gt .= html_writer::start_tag('table'); // </TABLE>
     $gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'confirmed', 'value' => 1));       
 
-	if (isset($enrolltutor))
-		$gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'enrolltutor', 'value' => $enrolltutor));
-	
-	
 	$gt .= html_writer::start_tag('tr');
 	$gt .= html_writer::tag('th', get_string('groupname', 'report_groupgen'));
 	$gt .= html_writer::end_tag('tr');
@@ -133,9 +162,6 @@ if ($data = $mform->get_data()) {
 	$available = 0;
 	foreach ($groups as $i => $group) {
 		$gt .= html_writer::start_tag('tr');
-
-		
-
 		if (empty($group->exists)) {
 			$gt .= html_writer::tag('td', $group->groupname, array('class' => 'groupgen_okay'));
 		    $gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => "group[$i]", 'value' => $group->groupname));       
@@ -145,8 +171,20 @@ if ($data = $mform->get_data()) {
 		}
 		$gt .= html_writer::end_tag('tr');
 	}
-
 	$gt .= html_writer::end_tag('table'); // </TABLE>
+	
+	if (isset($enrolltutor)) {
+		$gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'enrolltutor', 'value' => $enrolltutor));
+		$gt .= html_writer::tag('p', get_string('enroll_tutor_enabled', 'report_groupgen').': <b>'.$tutor->lastname.', '.$tutor->firstname.'</b>', array());
+	}
+	
+	if (isset($grouping)) {
+		$gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'grouping', 'value' => $grouping));
+		if ($grouping_new)
+			$gt .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'grouping_new', 'value' => $grouping_name));
+		$gt .= html_writer::tag('p', get_string('grouping', 'report_groupgen').': <b>'.$grouping_name.'</b> '.($grouping_new ? get_string('grouping_create_new', 'report_groupgen') : ''), array());
+	}
+	
 	if ($available == 0) {
 		$gt .= html_writer::tag('p', get_string('confirm_disabled', 'report_groupgen'), array('class' => 'groupgen_error')) ;
 	} else {

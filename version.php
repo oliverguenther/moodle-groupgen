@@ -26,6 +26,6 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2012020601;
+$plugin->version   = 2012020701;
 $plugin->requires  = 2011110200;
 $plugin->component = 'report_groupgen';

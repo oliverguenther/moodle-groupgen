@@ -9,7 +9,7 @@ require_once ($CFG->dirroot . '/course/moodleform_mod.php');
 class report_groupgen_form extends moodleform {
 
     function definition() {
-        global $CFG, $course;
+        global $CFG, $course, $DB;
 
         $mform = & $this->_form;
 
@@ -34,10 +34,12 @@ class report_groupgen_form extends moodleform {
 		// Slices duration
 		$mform->addElement('duration', 'timeslices_duration', get_string('timeslices_duration', 'report_groupgen'));
         $mform->addHelpButton('timeslices_duration', 'timeslices_duration', 'report_groupgen');
+		$mform->setDefault('timeslices_duration', '6000');
 
 		// offset between slices
 		$mform->addElement('duration', 'timeslices_offset', get_string('timeslices_offset', 'report_groupgen'));
         $mform->addHelpButton('timeslices_offset', 'timeslices_offset', 'report_groupgen');
+		$mform->setDefault('timeslices_offset', '600');
 
 		// Disable all settings unless checked
         $mform->disabledIf('timeslices_starttime', 'timeslices_enabled', 'notchecked');
@@ -69,6 +71,26 @@ class report_groupgen_form extends moodleform {
 		$mform->setDefault('groupname_template', 'Gruppen-Intervall Nr. #{counter}: #{start} - #{end}');
 		
 //-------------------------------------------------------------------------------
+		// Allow to choose an existing grouping or create a new one to put all created groups into
+		
+		// Fetch existing groupings
+		$groupings = $DB->get_records('groupings', array('courseid'=>$course->id));
+		$list = array('0' => get_string('grouping_create_new', 'report_groupgen'));
+		foreach ($groupings as $grouping) {
+			$list[$grouping->id] = $grouping->name;
+		}
+		$mform->addElement('header', 'grouping_header', get_string('grouping', 'report_groupgen'));
+		$mform->addElement('checkbox', 'grouping_enabled', get_string('grouping_enabled', 'report_groupgen'));
+        $mform->addHelpButton('grouping_enabled', 'grouping_enabled', 'report_groupgen');
+		$mform->addElement('select', 'grouping_select', get_string('grouping_choose', 'report_groupgen'), $list);
+        $mform->addElement('text', 'grouping_new_name', get_string('grouping_new_name', 'report_groupgen'), 'size="100"');
+		$mform->addHelpButton('grouping_new_name', 'grouping_new_name', 'report_groupgen');
+		
+		$mform->disabledIf('grouping_select', 'grouping_enabled', 'notchecked');
+		$mform->disabledIf('grouping_new_name', 'grouping_enabled', 'notchecked');
+		$mform->disabledIf('grouping_new_name', 'grouping_select', 'neq', '0');
+		
+//-------------------------------------------------------------------------------
 		// Allow one enlisted user to be enrolled in all groups (e.g., a tutor/mentor)
 
 		// Fetch enrolled users
@@ -85,9 +107,6 @@ class report_groupgen_form extends moodleform {
 
         $mform->disabledIf('enroll_tutor_select', 'enroll_tutor_enabled', 'notchecked');
 
-
-		
-
 //-------------------------------------------------------------------------------
         $this->add_action_buttons();
     }
@@ -101,7 +120,9 @@ class report_groupgen_form extends moodleform {
 
 		if (!isset($data['counter_enabled']) && (strpos($data['groupname_template'], '#{counter}') !== false))
 			$errors['counter_enabled'] = get_string('error_template_marker', 'report_groupgen', '#{counter}');
-
+			
+		if (isset($data['grouping_enabled']) && $data['grouping_select'] == 0 && (!isset($data['grouping_new_name']) || $data['grouping_new_name'] == ''))
+			$errors['grouping_new_name'] = get_string('error_grouping_name_empty', 'report_groupgen');
 
 		$timeslices_marker_errors = array();
 		if (!isset($data['timeslices_enabled']) && (strpos($data['groupname_template'], '#{start}') !== false))

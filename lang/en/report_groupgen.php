@@ -71,3 +71,16 @@ $string['confirm_disabled'] = 'All groups exist already. Cannot proceed';
 $string['creategroup_failed'] = 'Couldn\'t create group named {$a}';
 $string['enrolltutor_failed'] = 'Couldn\'t enroll user with id {$a} into group {$b}';
 
+// grouping
+$string['grouping'] = 'Grouping';
+$string['grouping_enabled'] = 'Activate grouping';
+$string['grouping_enabled_help'] = 'If activated, all created groups will be added to the chosen grouping';
+$string['grouping_choose'] = 'Choose grouping';
+$string['grouping_create_new'] = ' -- Create a new grouping -- ';
+$string['grouping_new_name'] = 'New grouping name';
+$string['grouping_new_name_help'] = 'Only required if a new grouping is to be created';
+$string['error_grouping_name_empty'] = 'Cannot create a grouping with no name provided!';
+$string['groupingname_new'] = 'Grouping to create';
+$string['groupingname'] = 'Chosen grouping';
+$string['creategrouping_failed'] = 'Could not create grouping {$a}.';
+$string['assigngrouping_failed'] = 'Could not add group {$a} to grouping.';

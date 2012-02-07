@@ -53,6 +53,20 @@ function report_groupgen_generategroup($groupname, $course) {
 	return groups_create_group($data);
 }
 
+/**
+ * Generate a grouping, given the name
+ *
+ * @param string $groupingname
+ * @param stdClass $course
+ * @return grouping id or false if creation failed
+ */
+function report_groupgen_generategrouping($groupingname, $course) {
+	$data = new stdClass();
+	$data->name = $groupingname;
+	$data->courseid = $course->id;
+	return groups_create_grouping($data);
+}
+
 // TODO: remove?
 function report_groupgen_page_type_list($pagetype, $parentcontext, $currentcontext) {
     $array = array(

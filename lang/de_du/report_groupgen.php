@@ -69,3 +69,16 @@ $string['confirm_disabled'] = 'Alle Gruppen existieren bereits. Kann nicht fortf
 $string['creategroup_failed'] = 'Konnte die Gruppe {$a} nicht anlegen.';
 $string['enrolltutor_failed'] = 'Konnte den Nutzer {$a} nicht in die Gruppe {$b} einschreiben';
 
+// grouping
+$string['grouping'] = 'Gruppierung';
+$string['grouping_enabled'] = 'Gruppierung aktiviern';
+$string['grouping_enabled_help'] = 'Wenn aktiviert, werden alle erstellten Gruppen automatisch der gewählten Gruppierung hinzugefügt';
+$string['grouping_choose'] = 'Gruppierung auswählen';
+$string['grouping_create_new'] = ' -- Neue Gruppierung anlegen -- ';
+$string['grouping_new_name'] = 'Name der neuen Gruppierung';
+$string['grouping_new_name_help'] = 'Nur angeben, falls eine neue Gruppierung angelegt werden soll';
+$string['error_grouping_name_empty'] = 'Name der neuen Gruppierung kann nicht leer sein';
+$string['groupingname_new'] = 'Zu erstellende Gruppierung';
+$string['groupingname'] = 'Gewählte Gruppierung';
+$string['creategrouping_failed'] = 'Konnte die Gruppierung {$a} nicht anlegen.';
+$string['assigngrouping_failed'] = 'Konnte die Gruppe {$a} der Gruppierung {$b} nicht hinzufügen.';
