@@ -12,7 +12,7 @@ A Moodle 2.2 report plugin to generate groups based on time slices.
 - Install to <Moodle_root>/report/groupgen
 - Installs as a coursereport, which resides under /report since 2.2
 
-    $ git clone https://github.com/oliwr/moodle-groupgen <moodle>/report/
+    $ git clone https://github.com/oliwr/moodle-groupgen (moodle-root)/report/groupgen
 
 
 ## TODO
